@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+message AccountRequest {
+	bytes address = 1;
+}
+
+enum Status {
+  OFFLINE = 0;
+  ONLINE = 1;
+  NOT_PARTICIPATING = 2;
+}
+
+message AssetParams {
+  uint64 total = 1;
+  uint32 decimals = 2;
+  bool default_frozen = 3;
+  bytes unit_name = 4;
+  bytes asset_name = 5;
+  bytes url = 6;
+  bytes metadata_hash = 7;
+  bytes manager = 8;
+  bytes reserve = 9;
+  bytes freeze = 10;
+  bytes clawback = 11;
+}
+
+message AssetHolding {
+  uint64 amount = 1;
+  bool frozen = 2;
+}
+
+message StateSchema {
+  uint64 num_uint = 1;
+  uint64 num_byte_slice = 2;
+}
+
+message TealKeyValue {
+  bytes key = 1;
+  oneof value {
+    bytes bytes = 2;
+    uint64 uint = 3;
+  }
+}
+
+message AppLocalState {
+  StateSchema schema = 1;
+  repeated TealKeyValue key_value = 2;
+}
+
+message AppParams {
+  bytes approval_program = 1;
+  bytes clear_state_program = 2;
+  repeated TealKeyValue global_state = 3;
+  StateSchema local_state_schema = 4;
+  StateSchema global_state_schema = 5;
+  uint32 extra_program_pages = 6;
+}
+
+message AccountData {
+  Status status = 1;
+  uint64 microalgos = 2;
+  uint64 rewards_base = 3;
+  uint64 rewarded_microalgos = 4;
+  bytes vote_id = 5;
+  bytes selection_id = 6;
+  bytes state_proof_id = 7;
+  uint64 vote_first_valid = 8;
+  uint64 vote_last_valid = 9;
+  uint64 vote_key_dilution = 10;
+  map<uint64, AssetParams> asset_params = 11;
+  map<uint64, AssetHolding> asset_holdings = 12;
+  bytes auth_addr = 13;
+  map<uint64, AppLocalState> app_local_states = 14;
+  map<uint64, AppParams> app_params = 15;
+  StateSchema total_app_schema = 16;
+  uint32 total_extra_app_pages = 17;
+}
+
+message AccountResponse {
+  AccountData account_data = 1;
+  uint64 round = 2;
+  uint64 amount_without_pending_rewards = 3;
+  uint64 min_balance = 4;
+}
+
+service Default {
+	rpc AccountInformation (AccountRequest) returns (AccountResponse) {}
+}
